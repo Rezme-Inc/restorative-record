@@ -130,6 +130,7 @@ interface Award {
   date: string;
   file?: File;
   filePreview?: string;
+  narrative?: string;
 }
 
 interface SkillsData {
@@ -138,6 +139,7 @@ interface SkillsData {
   otherSkills: string;
   file?: File;
   filePreview?: string;
+  narrative?: string;
 }
 
 interface CommunityEngagement {
@@ -166,6 +168,7 @@ interface Credential {
   credentialUrl: string;
   file?: File;
   filePreview?: string;
+  narrative?: string;
 }
 
 interface Mentor {
@@ -176,6 +179,7 @@ interface Mentor {
   email: string;
   phone: string;
   website: string;
+  narrative?: string;
 }
 
 interface Education {
@@ -360,14 +364,15 @@ export default function RestorativeRecord() {
     softSkills: [],
     hardSkills: [],
     otherSkills: '',
+    narrative: '',
   });
   const [communityEngagements, setCommunityEngagements] = useState<CommunityEngagement[]>([]);
-  const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
+  const [selectedPrograms, setSelectedPrograms] = useState<{ id: string; narrative: string }[]>([]);
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
   const [employmentHistory, setEmploymentHistory] = useState<Employment[]>([]);
-  const [hobbies, setHobbies] = useState<{ general: string[]; sports: string[]; other: string; file?: File; filePreview?: string }>({ general: [], sports: [], other: '', });
+  const [hobbies, setHobbies] = useState<{ general: string[]; sports: string[]; other: string; file?: File; filePreview?: string; narrative?: string }>({ general: [], sports: [], other: '', narrative: '' });
   
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const skillsFileInputRef = useRef<HTMLInputElement>(null);
@@ -434,7 +439,7 @@ export default function RestorativeRecord() {
   };
 
   const handleAddAward = () => {
-    setAwards([...awards, { type: '', name: '', organization: '', date: '' }]);
+    setAwards([...awards, { type: '', name: '', organization: '', date: '', narrative: '' }]);
   };
 
   const handleFileChange = (index: number, file: File | null) => {
@@ -575,9 +580,9 @@ export default function RestorativeRecord() {
   const handleProgramChange = (programId: string, checked: boolean) => {
     setSelectedPrograms(prev => {
       if (checked) {
-        return [...prev, programId];
+        return [...prev, { id: programId, narrative: '' }];
       } else {
-        return prev.filter(id => id !== programId);
+        return prev.filter(p => p.id !== programId);
       }
     });
   };
@@ -589,7 +594,8 @@ export default function RestorativeRecord() {
       issueDate: '',
       expiryDate: '',
       credentialId: '',
-      credentialUrl: ''
+      credentialUrl: '',
+      narrative: ''
     }]);
   };
 
@@ -646,7 +652,8 @@ export default function RestorativeRecord() {
       title: '',
       email: '',
       phone: '',
-      website: ''
+      website: '',
+      narrative: ''
     }]);
   };
 
@@ -792,7 +799,7 @@ export default function RestorativeRecord() {
     }
   };
 
-  const handleHobbiesChange = (field: 'general' | 'sports' | 'other', value: any) => {
+  const handleHobbiesChange = (field: 'general' | 'sports' | 'other' | 'narrative', value: any) => {
     setHobbies(prev => ({ ...prev, [field]: value }));
   };
 
@@ -1173,6 +1180,23 @@ export default function RestorativeRecord() {
                       </div>
                     )}
                   </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-700">Narrative</Label>
+                    <Textarea
+                      value={award.narrative || ''}
+                      onChange={e => {
+                        const newAwards = [...awards];
+                        newAwards[index].narrative = e.target.value;
+                        setAwards(newAwards);
+                      }}
+                      placeholder="Provide a narrative about this achievement or recognition. Describe its significance, your role, and what it means to you."
+                      className="min-h-[100px] border-gray-200 bg-white"
+                      maxLength={500}
+                    />
+                    <div className="text-right text-sm text-gray-500">
+                      {(award.narrative ? award.narrative.length : 0)}/500 characters
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1385,6 +1409,19 @@ export default function RestorativeRecord() {
                     </div>
                   </div>
                 )}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-700">Narrative</Label>
+                <Textarea
+                  value={skillsData.narrative || ''}
+                  onChange={e => setSkillsData({ ...skillsData, narrative: e.target.value })}
+                  placeholder="Provide a narrative about your skills. Describe how you developed them, their significance, and how they have helped you."
+                  className="min-h-[100px] border-gray-200 bg-white"
+                  maxLength={500}
+                />
+                <div className="text-right text-sm text-gray-500">
+                  {(skillsData.narrative ? skillsData.narrative.length : 0)}/500 characters
+                </div>
               </div>
             </div>
           </div>
@@ -1615,26 +1652,50 @@ export default function RestorativeRecord() {
                 Select the Rehabilitative Programs you have completed
               </Label>
               <div className="grid gap-4">
-                {rehabilitativePrograms.map((program) => (
-                  <div key={program.id} className="flex items-start space-x-3 rounded-lg border border-gray-200 p-4">
-                    <Checkbox
-                      id={program.id}
-                      checked={selectedPrograms.includes(program.id)}
-                      onCheckedChange={(checked) => handleProgramChange(program.id, checked as boolean)}
-                    />
-                    <div className="space-y-1">
-                      <label
-                        htmlFor={program.id}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {program.name}
-                      </label>
-                      <p className="text-sm text-gray-500">
-                        {program.description}
-                      </p>
+                {rehabilitativePrograms.map((program) => {
+                  const selected = selectedPrograms.find(p => p.id === program.id);
+                  return (
+                    <div key={program.id} className="flex flex-col space-y-2 rounded-lg border border-gray-200 p-4">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id={program.id}
+                          checked={!!selected}
+                          onCheckedChange={(checked) => handleProgramChange(program.id, checked as boolean)}
+                        />
+                        <div className="space-y-1">
+                          <label
+                            htmlFor={program.id}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {program.name}
+                          </label>
+                          <p className="text-sm text-gray-500">
+                            {program.description}
+                          </p>
+                        </div>
+                      </div>
+                      {selected && (
+                        <div className="mt-2 space-y-2">
+                          <Label className="text-gray-700">Narrative</Label>
+                          <Textarea
+                            value={selected.narrative}
+                            onChange={e => {
+                              setSelectedPrograms(prev => prev.map(p =>
+                                p.id === program.id ? { ...p, narrative: e.target.value } : p
+                              ));
+                            }}
+                            placeholder="Provide a narrative about your experience in this program. Describe what you learned, how it impacted you, and its significance."
+                            className="min-h-[100px] border-gray-200 bg-white"
+                            maxLength={500}
+                          />
+                          <div className="text-right text-sm text-gray-500">
+                            {selected.narrative.length}/500 characters
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -1767,6 +1828,22 @@ export default function RestorativeRecord() {
                       }}
                       placeholder="Enter credential URL of the issuing organization"
                       className="border-gray-200 bg-white"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-gray-700">
+                      Narrative
+                    </Label>
+                    <Textarea
+                      value={credential.narrative || ''}
+                      onChange={(e) => {
+                        const newCredentials = [...credentials];
+                        newCredentials[index].narrative = e.target.value;
+                        setCredentials(newCredentials);
+                      }}
+                      placeholder="Describe what this certification means to you and how it has helped in your journey"
+                      className="border-gray-200 bg-white min-h-[100px]"
                     />
                   </div>
 
@@ -2001,6 +2078,24 @@ export default function RestorativeRecord() {
                       placeholder="https://example.com"
                       className="border-gray-200 bg-white"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-gray-700">Narrative</Label>
+                    <Textarea
+                      value={mentor.narrative || ''}
+                      onChange={e => {
+                        const newMentors = [...mentors];
+                        newMentors[index].narrative = e.target.value;
+                        setMentors(newMentors);
+                      }}
+                      placeholder="Describe how this mentor supported you, what you learned from them, or why their recommendation is meaningful."
+                      className="min-h-[100px] border-gray-200 bg-white"
+                      maxLength={500}
+                    />
+                    <div className="text-right text-sm text-gray-500">
+                      {(mentor.narrative ? mentor.narrative.length : 0)}/500 characters
+                    </div>
                   </div>
                 </div>
               ))}
@@ -2613,6 +2708,17 @@ export default function RestorativeRecord() {
               />
               <div className="text-right text-sm text-gray-500">
                 {hobbies.other.length}/300 characters
+              </div>
+              <Label className="text-gray-700">Hobbies Narrative</Label>
+              <Textarea
+                value={hobbies.narrative || ''}
+                onChange={e => handleHobbiesChange('narrative', e.target.value)}
+                placeholder="Describe what your hobbies and interests mean to you, how they have shaped your journey, or how they help you grow."
+                className="min-h-[100px] border-gray-200 bg-white"
+                maxLength={500}
+              />
+              <div className="text-right text-sm text-gray-500">
+                {(hobbies.narrative ? hobbies.narrative.length : 0)}/500 characters
               </div>
             </div>
             {/* File Upload (unchanged) */}

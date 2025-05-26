@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Pencil, Download, Printer, Share2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -17,6 +17,7 @@ const userProfile = {
       date: '2019-05-15',
       file: { name: 'deanslist.pdf', size: 102400, type: 'application/pdf' },
       filePreview: '',
+      narrative: 'This award recognized my academic achievement and commitment to excellence during my studies.',
     }
   ],
   skills: {
@@ -25,6 +26,7 @@ const userProfile = {
     otherSkills: 'Fluent in Spanish',
     file: { name: 'skills-certificate.pdf', size: 51200, type: 'application/pdf' },
     filePreview: '',
+    narrative: 'This is a narrative for the skills section.',
   },
   communityEngagement: [
     {
@@ -43,6 +45,7 @@ const userProfile = {
       name: 'Mindfulness Coaching',
       description: 'Completed mindfulness and wellness program.',
       completed: true,
+      narrative: 'This program helped me learn to manage stress and improve my mental health.'
     }
   ],
   certifications: [
@@ -55,6 +58,7 @@ const userProfile = {
       credentialUrl: 'https://certs.techforgood.org/12345',
       file: { name: 'ethics-cert.pdf', size: 30720, type: 'application/pdf' },
       filePreview: '',
+      narrative: 'This is a narrative for the certification.',
     }
   ],
   mentors: [
@@ -66,6 +70,7 @@ const userProfile = {
       email: 'mark@example.com',
       phone: '555-123-4567',
       website: 'https://markwalsh.com',
+      narrative: 'Mark provided invaluable guidance and support during my transition, helping me develop both technical and soft skills.'
     }
   ],
   employmentHistory: [
@@ -89,6 +94,7 @@ const userProfile = {
     other: 'Chess, Cooking',
     file: { name: 'hobbies-photo.jpg', size: 10240, type: 'image/jpeg' },
     filePreview: '',
+    narrative: 'This is a narrative for the hobbies section.',
   },
   education: [
     {
@@ -109,6 +115,15 @@ const userProfile = {
 
 export default function MyRestorativeRecord() {
   const router = useRouter();
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedImage = localStorage.getItem('profileImage');
+      setProfileImage(savedImage);
+    }
+  }, []);
+
   // Placeholder handlers
   const handlePrint = () => window.print();
   const handleDownload = () => alert('Download not implemented');
@@ -122,7 +137,7 @@ export default function MyRestorativeRecord() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <img src={userProfile.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover" />
+          <img src={profileImage || userProfile.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{userProfile.name}</h1>
             <div className="text-sm text-gray-500">MY RESTORATIVE RECORD</div>
@@ -157,6 +172,11 @@ export default function MyRestorativeRecord() {
               <div className="text-gray-700 mb-1">Type: {award.type}</div>
               <div className="text-gray-700 mb-1">Organization: {award.organization}</div>
               <div className="text-gray-500 mb-1">Date: {award.date}</div>
+              {award.narrative && (
+                <div className="mb-1">
+                  <span className="font-medium text-gray-700">Narrative:</span> <span className="text-gray-700">{award.narrative}</span>
+                </div>
+              )}
               {award.file && (
                 <div className="mt-2 flex items-center gap-4">
                   {award.filePreview && award.file.type && award.file.type.startsWith('image/') ? (
@@ -192,6 +212,11 @@ export default function MyRestorativeRecord() {
             ))}
           </div>
           {userProfile.skills.otherSkills && <div className="mb-1 text-gray-700">Other: {userProfile.skills.otherSkills}</div>}
+          {userProfile.skills.narrative && (
+            <div className="mb-1">
+              <span className="font-medium text-gray-700">Narrative:</span> <span className="text-gray-700">{userProfile.skills.narrative}</span>
+            </div>
+          )}
           {userProfile.skills.file && (
             <div className="mt-2 flex items-center gap-4">
               {userProfile.skills.filePreview && userProfile.skills.file.type && userProfile.skills.file.type.startsWith('image/') ? (
@@ -241,11 +266,15 @@ export default function MyRestorativeRecord() {
           <Button variant="ghost" size="icon" onClick={() => handleEdit('rehabilitativePrograms')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
-          {userProfile.rehabilitativePrograms && userProfile.rehabilitativePrograms.map((prog, idx) => (
+          {userProfile.rehabilitativePrograms && userProfile.rehabilitativePrograms.map((program, idx) => (
             <div key={idx} className="rounded-lg border border-gray-200 p-4 bg-white">
-              <div className="font-semibold text-gray-900 text-base mb-1">{prog.name}</div>
-              <div className="text-gray-700 mb-1">Description: {prog.description}</div>
-              <div className="text-gray-700 mb-1">Completed: {prog.completed ? 'Yes' : 'No'}</div>
+              <div className="font-semibold text-gray-900 text-base mb-1">{program.name}</div>
+              <div className="text-gray-700 mb-1">{program.description}</div>
+              {program.narrative && (
+                <div className="mb-1">
+                  <span className="font-medium text-gray-700">Narrative:</span> <span className="text-gray-700">{program.narrative}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -266,6 +295,11 @@ export default function MyRestorativeRecord() {
               <div className="text-gray-700 mb-1">Expiry Date: {cert.expiryDate}</div>
               <div className="text-gray-700 mb-1">Credential ID: {cert.credentialId}</div>
               {cert.credentialUrl && <div className="text-blue-700 mb-1"><a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer">{cert.credentialUrl}</a></div>}
+              {cert.narrative && (
+                <div className="mb-1">
+                  <span className="font-medium text-gray-700">Narrative:</span> <span className="text-gray-700">{cert.narrative}</span>
+                </div>
+              )}
               {cert.file && (
                 <div className="mt-2 flex items-center gap-4">
                   {cert.filePreview && cert.file.type && cert.file.type.startsWith('image/') ? (
@@ -297,6 +331,11 @@ export default function MyRestorativeRecord() {
               {mentor.email && <div className="text-gray-700 mb-1">Email: {mentor.email}</div>}
               {mentor.phone && <div className="text-gray-700 mb-1">Phone: {mentor.phone}</div>}
               {mentor.website && <div className="text-blue-700 mb-1"><a href={mentor.website} target="_blank" rel="noopener noreferrer">{mentor.website}</a></div>}
+              {mentor.narrative && (
+                <div className="mb-1">
+                  <span className="font-medium text-gray-700">Narrative:</span> <span className="text-gray-700">{mentor.narrative}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -312,14 +351,18 @@ export default function MyRestorativeRecord() {
           {userProfile.employmentHistory && userProfile.employmentHistory.map((job, idx) => (
             <div key={idx} className="rounded-lg border border-gray-200 p-4 bg-white">
               <div className="font-semibold text-gray-900 text-base mb-1">{job.title}</div>
-              <div className="text-gray-700 mb-1">Type: {job.type}</div>
               <div className="text-gray-700 mb-1">Company: {job.company}</div>
+              <div className="text-gray-700 mb-1">Type: {job.type}</div>
               <div className="text-gray-700 mb-1">Location: {job.location}</div>
-              <div className="text-gray-700 mb-1">Incarcerated: {job.incarcerated ? 'Yes' : 'No'}</div>
-              <div className="text-gray-700 mb-1">Currently Working: {job.currentlyWorking ? 'Yes' : 'No'}</div>
-              <div className="text-gray-700 mb-1">Start Date: {job.startDate}</div>
-              <div className="text-gray-700 mb-1">End Date: {job.currentlyWorking ? 'Present' : (job.endDate || 'N/A')}</div>
-              <div className="text-gray-700 mb-1">Description: {job.description}</div>
+              <div className="text-gray-700 mb-1">
+                {job.startDate} - {job.currentlyWorking ? 'Present' : job.endDate}
+              </div>
+              {job.incarcerated && <div className="text-gray-700 mb-1">Worked while incarcerated</div>}
+              {job.description && (
+                <div className="mb-1">
+                  <span className="font-medium text-gray-700">Description:</span> <span className="text-gray-700">{job.description}</span>
+                </div>
+              )}
               {job.file && (
                 <div className="mt-2 flex items-center gap-4">
                   {job.filePreview && job.file.type && job.file.type.startsWith('image/') ? (
@@ -355,6 +398,11 @@ export default function MyRestorativeRecord() {
             ))}
           </div>
           {userProfile.hobbies.other && <div className="mb-2 text-gray-700">Other: {userProfile.hobbies.other}</div>}
+          {userProfile.hobbies.narrative && (
+            <div className="mb-2">
+              <span className="font-medium text-gray-700">Narrative:</span> <span className="text-gray-700">{userProfile.hobbies.narrative}</span>
+            </div>
+          )}
           {userProfile.hobbies.file && (
             <div className="mt-2 flex items-center gap-4">
               {userProfile.hobbies.filePreview && userProfile.hobbies.file.type && userProfile.hobbies.file.type.startsWith('image/') ? (
@@ -375,21 +423,21 @@ export default function MyRestorativeRecord() {
           <Button variant="ghost" size="icon" onClick={() => handleEdit('education')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
-          {userProfile.education.map((edu, idx) => (
+          {userProfile.education && userProfile.education.map((edu, idx) => (
             <div key={idx} className="rounded-lg border border-gray-200 p-4 bg-white">
-              <div className="flex flex-wrap gap-4 items-center mb-2">
-                <div className="font-semibold text-gray-900 text-base">{edu.school}</div>
-                {edu.degree && <div className="text-gray-700">Degree: {edu.degree}</div>}
-                {edu.field && <div className="text-gray-700">Field: {edu.field}</div>}
-                {edu.grade && <div className="text-gray-700">Grade: {edu.grade}</div>}
-                {edu.currentlyEnrolled && <div className="text-green-600 font-medium">Currently Enrolled</div>}
+              <div className="font-semibold text-gray-900 text-base mb-1">{edu.school}</div>
+              <div className="text-gray-700 mb-1">Degree: {edu.degree}</div>
+              <div className="text-gray-700 mb-1">Field: {edu.field}</div>
+              <div className="text-gray-700 mb-1">Location: {edu.location}</div>
+              <div className="text-gray-700 mb-1">Grade: {edu.grade}</div>
+              <div className="text-gray-700 mb-1">
+                {edu.startDate} - {edu.currentlyEnrolled ? 'Present' : edu.endDate}
               </div>
-              {edu.location && <div className="text-gray-500 mb-1">Location: {edu.location}</div>}
-              <div className="flex gap-8 mb-1">
-                <div className="text-gray-500">Start: {edu.startDate || 'N/A'}</div>
-                <div className="text-gray-500">End: {edu.currentlyEnrolled ? 'Present' : (edu.endDate || 'N/A')}</div>
-              </div>
-              {edu.description && <div className="mb-2 text-gray-700 whitespace-pre-line">{edu.description}</div>}
+              {edu.description && (
+                <div className="mb-1">
+                  <span className="font-medium text-gray-700">Description:</span> <span className="text-gray-700">{edu.description}</span>
+                </div>
+              )}
               {edu.file && (
                 <div className="mt-2 flex items-center gap-4">
                   {edu.filePreview && edu.file.type && edu.file.type.startsWith('image/') ? (
