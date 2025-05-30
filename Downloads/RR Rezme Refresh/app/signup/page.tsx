@@ -89,9 +89,8 @@ export default function SignUp() {
                 </div>
               </div>
 
-              <Button
+              <Button className="bg-black text-white"
                 type="submit"
-                className="w-32 bg-primary text-white hover:bg-primary/90"
               >
                 SIGN UP
               </Button>

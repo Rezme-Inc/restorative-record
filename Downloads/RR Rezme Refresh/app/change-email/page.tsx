@@ -58,7 +58,7 @@ export default function ChangeEmail() {
               <div className="text-center">
                 <Button
                   type="submit"
-                  className="w-32 border border-white bg-transparent text-white hover:bg-white hover:text-black"
+                  className="bg-black text-white"
                 >
                   SUBMIT
                 </Button>

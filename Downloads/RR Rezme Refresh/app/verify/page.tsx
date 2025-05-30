@@ -52,10 +52,7 @@ export default function Verify() {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-primary text-white hover:bg-primary/90"
-                >
+                <Button className="bg-black text-white" type="submit">
                   VERIFY CODE
                 </Button>
               </form>
