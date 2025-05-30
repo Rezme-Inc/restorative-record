@@ -1,8 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Pencil, Download, Printer, Share2 } from 'lucide-react';
+import { Pencil, Printer, Share2, Settings, Mail, Facebook, Instagram, Twitter, Linkedin, Github, Globe, Youtube, Handshake } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ShareDialog } from '@/components/ui/ShareDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 // Mock data structure (replace with real data/context later)
 const userProfile = {
@@ -111,11 +115,38 @@ const userProfile = {
       filePreview: '',
     }
   ],
+  socialLinks: {
+    facebook: 'https://facebook.com/samfinn',
+    instagram: 'https://instagram.com/samfinn',
+    twitter: 'https://twitter.com/samfinn',
+    linkedin: 'https://linkedin.com/in/samfinn',
+    github: 'https://github.com/samfinn',
+    website: 'https://samfinn.com',
+    youtube: 'https://youtube.com/samfinn',
+    handshake: 'https://handshake.com/samfinn',
+  },
 };
 
 export default function MyRestorativeRecord() {
   const router = useRouter();
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [legalSubmitted, setLegalSubmitted] = useState(false);
+  const [legalForm, setLegalForm] = useState({
+    name: '',
+    email: '',
+    location: '',
+    phone: '',
+    employers: '',
+    description: '',
+  });
+
+  // Example employer info (replace with real data as needed)
+  const employer = {
+    name: 'Acme Corp',
+    logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Anonymous_emblem.svg',
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -124,13 +155,12 @@ export default function MyRestorativeRecord() {
     }
   }, []);
 
-  // Placeholder handlers
   const handlePrint = () => window.print();
-  const handleDownload = () => alert('Download not implemented');
-  const handleShare = () => alert('Share not implemented');
   const handleEdit = (section: string) => {
     router.push(`/restorative-record?edit=${section}`);
   };
+
+  const recordUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
@@ -144,26 +174,142 @@ export default function MyRestorativeRecord() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handlePrint}><Printer className="w-4 h-4 mr-2" />Print</Button>
-          <Button variant="outline" onClick={handleDownload}><Download className="w-4 h-4 mr-2" />Download</Button>
-          <Button variant="outline" onClick={handleShare}><Share2 className="w-4 h-4 mr-2" />Share</Button>
+          <Button onClick={handlePrint}><Printer className="w-4 h-4 mr-2" />Print</Button>
+          <Button onClick={() => setShareOpen(true)}><Share2 className="w-4 h-4 mr-2" />Share</Button>
+          <Button onClick={() => router.push('/dashboard')}><Settings className="w-4 h-4 mr-2" />Settings</Button>
+          <Button onClick={() => setLegalOpen(true)}><Mail className="w-4 h-4 mr-2" />Legal Assistance</Button>
         </div>
       </div>
+      <ShareDialog open={shareOpen} onOpenChange={setShareOpen} employer={employer} recordUrl={recordUrl} />
+      <Dialog open={legalOpen} onOpenChange={setLegalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Get Legal Help</DialogTitle>
+            <DialogDescription>
+              If you believe you have experienced employment discrimination or have questions about fair chance hiring laws, you can use this form to contact a legal team in your jurisdiction. Your information will be sent to the appropriate legal professionals who handle employment discrimination and fair chance hiring issues.
+            </DialogDescription>
+          </DialogHeader>
+          {legalSubmitted ? (
+            <div className="py-8 text-center text-green-600 font-semibold">Thank you, your request has been sent!</div>
+          ) : (
+            <form
+              className="space-y-4"
+              onSubmit={e => {
+                e.preventDefault();
+                setLegalSubmitted(true);
+              }}
+            >
+              <Input
+                required
+                placeholder="Your Name"
+                value={legalForm.name}
+                onChange={e => setLegalForm(f => ({ ...f, name: e.target.value }))}
+              />
+              <Input
+                required
+                type="email"
+                placeholder="Your Email"
+                value={legalForm.email}
+                onChange={e => setLegalForm(f => ({ ...f, email: e.target.value }))}
+              />
+              <Input
+                required
+                placeholder="Location (City, State)"
+                value={legalForm.location}
+                onChange={e => setLegalForm(f => ({ ...f, location: e.target.value }))}
+              />
+              <Input
+                placeholder="Phone (optional)"
+                value={legalForm.phone}
+                onChange={e => setLegalForm(f => ({ ...f, phone: e.target.value }))}
+              />
+              <Input
+                required
+                placeholder="Employer(s) that have run background checks (comma separated)"
+                value={legalForm.employers}
+                onChange={e => setLegalForm(f => ({ ...f, employers: e.target.value }))}
+              />
+              <Textarea
+                required
+                placeholder="Describe your issue or question"
+                value={legalForm.description}
+                onChange={e => setLegalForm(f => ({ ...f, description: e.target.value }))}
+              />
+              <DialogFooter>
+                <Button type="submit">Submit</Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">Cancel</Button>
+                </DialogClose>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* About Section */}
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">About</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('about')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('about')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <p className="text-gray-700 whitespace-pre-line">{userProfile.about}</p>
+      </section>
+
+      {/* Social Media Links Section */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold text-gray-900">Social Media</h2>
+          <Button size="icon" onClick={() => handleEdit('introduction')}><Pencil className="w-4 h-4" /></Button>
+        </div>
+        <div className="flex flex-wrap gap-4">
+          {userProfile.socialLinks?.facebook && (
+            <a href={userProfile.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Facebook className="w-6 h-6" />
+            </a>
+          )}
+          {userProfile.socialLinks?.instagram && (
+            <a href={userProfile.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Instagram className="w-6 h-6" />
+            </a>
+          )}
+          {userProfile.socialLinks?.twitter && (
+            <a href={userProfile.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Twitter className="w-6 h-6" />
+            </a>
+          )}
+          {userProfile.socialLinks?.linkedin && (
+            <a href={userProfile.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Linkedin className="w-6 h-6" />
+            </a>
+          )}
+          {userProfile.socialLinks?.github && (
+            <a href={userProfile.socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Github className="w-6 h-6" />
+            </a>
+          )}
+          {userProfile.socialLinks?.website && (
+            <a href={userProfile.socialLinks.website} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Globe className="w-6 h-6" />
+            </a>
+          )}
+          {userProfile.socialLinks?.youtube && (
+            <a href={userProfile.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Youtube className="w-6 h-6" />
+            </a>
+          )}
+          {userProfile.socialLinks?.handshake && (
+            <a href={userProfile.socialLinks.handshake} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary">
+              <Handshake className="w-6 h-6" />
+            </a>
+          )}
+        </div>
       </section>
 
       {/* Personal Achievements / Awards Section */}
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Personal Achievements & Awards</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('awards')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('awards')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
           {userProfile.awards && userProfile.awards.map((award, idx) => (
@@ -196,7 +342,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Skills</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('skills')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('skills')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="mb-2">
           <div className="mb-1 font-medium text-gray-700">Soft Skills:</div>
@@ -234,7 +380,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Community Engagement</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('communityEngagement')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('communityEngagement')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
           {userProfile.communityEngagement && userProfile.communityEngagement.map((eng, idx) => (
@@ -263,7 +409,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Rehabilitative Programs</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('rehabilitativePrograms')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('rehabilitativePrograms')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
           {userProfile.rehabilitativePrograms && userProfile.rehabilitativePrograms.map((program, idx) => (
@@ -284,7 +430,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Certifications and Licenses</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('certifications')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('certifications')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
           {userProfile.certifications && userProfile.certifications.map((cert, idx) => (
@@ -319,7 +465,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Mentors</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('mentors')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('mentors')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
           {userProfile.mentors && userProfile.mentors.map((mentor, idx) => (
@@ -345,7 +491,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Employment History</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('employmentHistory')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('employmentHistory')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
           {userProfile.employmentHistory && userProfile.employmentHistory.map((job, idx) => (
@@ -382,7 +528,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Hobbies & Interests</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('hobbies')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('hobbies')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="rounded-lg border border-gray-200 p-4 bg-white">
           <div className="mb-2 font-medium text-gray-700">General:</div>
@@ -420,7 +566,7 @@ export default function MyRestorativeRecord() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-gray-900">Education</h2>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit('education')}><Pencil className="w-4 h-4" /></Button>
+          <Button size="icon" onClick={() => handleEdit('education')}><Pencil className="w-4 h-4" /></Button>
         </div>
         <div className="space-y-6">
           {userProfile.education && userProfile.education.map((edu, idx) => (

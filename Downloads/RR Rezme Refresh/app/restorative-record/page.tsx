@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { format } from 'date-fns';
+import { Facebook, Instagram, Twitter, Linkedin, Github, Globe, Youtube, Handshake, Link } from 'lucide-react';
 
 const categories = [
   {
@@ -373,6 +374,19 @@ export default function RestorativeRecord() {
   const [education, setEducation] = useState<Education[]>([]);
   const [employmentHistory, setEmploymentHistory] = useState<Employment[]>([]);
   const [hobbies, setHobbies] = useState<{ general: string[]; sports: string[]; other: string; file?: File; filePreview?: string; narrative?: string }>({ general: [], sports: [], other: '', narrative: '' });
+  const [socialLinks, setSocialLinks] = useState({
+    facebook: '',
+    instagram: '',
+    twitter: '',
+    linkedin: '',
+    github: '',
+    website: '',
+    reddit: '',
+    tiktok: '',
+    handshake: '',
+    portfolio: '',
+    pinterest: '',
+  });
   
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const skillsFileInputRef = useRef<HTMLInputElement>(null);
@@ -391,6 +405,20 @@ export default function RestorativeRecord() {
   const generalDropdownRef = useRef<HTMLDivElement>(null);
   const sportsInputRef = useRef<HTMLInputElement>(null);
   const sportsDropdownRef = useRef<HTMLDivElement>(null);
+
+  const socialPlatforms: { key: keyof typeof socialLinks; label: string; icon: React.ElementType }[] = [
+    { key: 'facebook', label: 'Facebook', icon: Facebook },
+    { key: 'instagram', label: 'Instagram', icon: Instagram },
+    { key: 'twitter', label: 'X (Twitter)', icon: Twitter },
+    { key: 'linkedin', label: 'LinkedIn', icon: Linkedin },
+    { key: 'github', label: 'GitHub', icon: Github },
+    { key: 'website', label: 'Personal Website', icon: Globe },
+    { key: 'reddit', label: 'Reddit', icon: Link }, // fallback icon
+    { key: 'tiktok', label: 'TikTok', icon: Youtube }, // Placeholder for TikTok
+    { key: 'handshake', label: 'Handshake', icon: Handshake },
+    { key: 'portfolio', label: 'Digital Portfolio Link', icon: Link },
+    { key: 'pinterest', label: 'Pinterest', icon: Link }, // fallback icon
+  ];
 
   useEffect(() => {
     const editParam = searchParams.get('edit');
@@ -887,107 +915,124 @@ export default function RestorativeRecord() {
                 Welcome to the Introduction section. Here, you can share your preferred occupations, personal narrative, and language proficiency. This information helps us understand your background and aspirations, setting the foundation for your restorative record.
               </p>
             </div>
+            <div className="mb-4 p-4 bg-white border border-gray-200 rounded">
+              <div className="mb-2 font-semibold text-gray-700">Social Media Profiles</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {socialPlatforms.map(({ key, label, icon: Icon }) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <Icon className="w-6 h-6 text-gray-500" />
+                    <Input
+                      type="url"
+                      placeholder={`Enter your ${label} URL`}
+                      value={socialLinks[key]}
+                      onChange={e => setSocialLinks({ ...socialLinks, [key]: e.target.value })}
+                      className="flex-1 border-gray-200 bg-white"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-gray-700">Preferred Occupation</Label>
-                <Input
-                  placeholder="Type here and press Enter to add an occupation"
-                  className="border-gray-200 bg-white"
-                  onKeyDown={handleAddOccupation}
-                />
-                {occupations.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {occupations.map((occupation, index) => (
+              <Label className="text-gray-700">Preferred Occupation</Label>
+              <Input
+                placeholder="Type here and press Enter to add an occupation"
+                className="border-gray-200 bg-white"
+                onKeyDown={handleAddOccupation}
+              />
+              {occupations.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {occupations.map((occupation, index) => (
+                    <div
+                      key={index}
+                      className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
+                    >
+                      {occupation}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-sm text-gray-500">
+                You can add 10 occupations of your choice
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-gray-700">Personal Narrative</Label>
+              <Textarea
+                value={narrative}
+                onChange={(e) => setNarrative(e.target.value)}
+                placeholder="Your personal narrative"
+                className="min-h-[200px] border-gray-200 bg-white"
+                maxLength={700}
+              />
+              <div className="text-right text-sm text-gray-500">
+                {narrative.length}/700 characters
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-gray-700">Language</Label>
+              <div className="space-y-4">
+                <p className="text-sm text-red-500">English Proficiency *</p>
+                <RadioGroup
+                  value={englishProficiency}
+                  onValueChange={setEnglishProficiency}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="bilingual" id="bilingual" />
+                    <Label htmlFor="bilingual" className="text-gray-700">Bilingual</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="advanced" id="advanced" />
+                    <Label htmlFor="advanced" className="text-gray-700">Advanced Proficiency</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="intermediate" id="intermediate" />
+                    <Label htmlFor="intermediate" className="text-gray-700">Intermediate Proficiency</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="basic" id="basic" />
+                    <Label htmlFor="basic" className="text-gray-700">Basic Proficiency</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="limited" id="limited" />
+                    <Label htmlFor="limited" className="text-gray-700">Limited Proficiency</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="none" id="none" />
+                    <Label htmlFor="none" className="text-gray-700">No Proficiency</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-gray-700">Other Languages</Label>
+                <Select onValueChange={handleAddLanguage}>
+                  <SelectTrigger className="border-gray-200 bg-white">
+                    <SelectValue placeholder="Select a language..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((language) => (
+                      <SelectItem key={language} value={language}>
+                        {language}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedLanguages.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {selectedLanguages.map((language, index) => (
                       <div
                         key={index}
                         className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
                       >
-                        {occupation}
+                        {language}
                       </div>
                     ))}
                   </div>
                 )}
-                <p className="text-sm text-gray-500">
-                  You can add 10 occupations of your choice
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <Label className="text-gray-700">Personal Narrative</Label>
-                <Textarea
-                  value={narrative}
-                  onChange={(e) => setNarrative(e.target.value)}
-                  placeholder="Your personal narrative"
-                  className="min-h-[200px] border-gray-200 bg-white"
-                  maxLength={700}
-                />
-                <div className="text-right text-sm text-gray-500">
-                  {narrative.length}/700 characters
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <Label className="text-gray-700">Language</Label>
-                <div className="space-y-4">
-                  <p className="text-sm text-red-500">English Proficiency *</p>
-                  <RadioGroup
-                    value={englishProficiency}
-                    onValueChange={setEnglishProficiency}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="bilingual" id="bilingual" />
-                      <Label htmlFor="bilingual" className="text-gray-700">Bilingual</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="advanced" id="advanced" />
-                      <Label htmlFor="advanced" className="text-gray-700">Advanced Proficiency</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="intermediate" id="intermediate" />
-                      <Label htmlFor="intermediate" className="text-gray-700">Intermediate Proficiency</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="basic" id="basic" />
-                      <Label htmlFor="basic" className="text-gray-700">Basic Proficiency</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="limited" id="limited" />
-                      <Label htmlFor="limited" className="text-gray-700">Limited Proficiency</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="none" id="none" />
-                      <Label htmlFor="none" className="text-gray-700">No Proficiency</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-gray-700">Other Languages</Label>
-                  <Select onValueChange={handleAddLanguage}>
-                    <SelectTrigger className="border-gray-200 bg-white">
-                      <SelectValue placeholder="Select a language..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {languages.map((language) => (
-                        <SelectItem key={language} value={language}>
-                          {language}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedLanguages.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {selectedLanguages.map((language, index) => (
-                        <div
-                          key={index}
-                          className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
-                        >
-                          {language}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -1001,7 +1046,7 @@ export default function RestorativeRecord() {
               <p className="text-gray-700 text-base">
                 Your personal achievements tell a powerful story about your journey and growth. Include any milestones, awards, or recognitions you've earned—whether before, during, or after incarceration. These experiences highlight your resilience, dedication, and the positive impact you've made.
               </p>
-            </div>
+              </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-gray-700">Award or Recognition</Label>
@@ -1211,204 +1256,204 @@ export default function RestorativeRecord() {
                 Your skills—both hard and soft—are a key part of your story. List any abilities, talents, or expertise you've developed through work, education, volunteering, or personal experience. Don't forget to include skills gained during incarceration or through self-study. These show your readiness and value to future employers.
               </p>
             </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-gray-700">
-                  Soft Skills <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  onValueChange={(value) => {
-                    if (!skillsData.softSkills.includes(value)) {
-                      setSkillsData({
-                        ...skillsData,
-                        softSkills: [...skillsData.softSkills, value]
-                      });
-                    }
-                  }}
-                >
-                  <SelectTrigger className="border-gray-200 bg-white">
-                    <SelectValue placeholder="Select your Soft Skills from the options below" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {softSkills.map((skill) => (
-                      <SelectItem key={skill} value={skill}>
-                        {skill}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {skillsData.softSkills.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {skillsData.softSkills.map((skill, index) =>
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
-                      >
-                        {skill}
-                        <button
-                          onClick={() => {
-                            setSkillsData({
-                              ...skillsData,
-                              softSkills: skillsData.softSkills.filter((_, i) => i !== index)
-                            });
-                          }}
-                          className="ml-1 text-primary hover:text-primary/80"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-gray-700">
-                  Hard Skills <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  onValueChange={(value) => {
-                    if (!skillsData.hardSkills.includes(value)) {
-                      setSkillsData({
-                        ...skillsData,
-                        hardSkills: [...skillsData.hardSkills, value]
-                      });
-                    }
-                  }}
-                >
-                  <SelectTrigger className="border-gray-200 bg-white">
-                    <SelectValue placeholder="Select your Hard Skills from the options below" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {hardSkills.map((skill) => (
-                      <SelectItem key={skill} value={skill}>
-                        {skill}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {skillsData.hardSkills.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {skillsData.hardSkills.map((skill, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
-                      >
-                        {skill}
-                        <button
-                          onClick={() => {
-                            setSkillsData({
-                              ...skillsData,
-                              hardSkills: skillsData.hardSkills.filter((_, i) => i !== index)
-                            });
-                          }}
-                          className="ml-1 text-primary hover:text-primary/80"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-gray-700">Other Skills</Label>
-                <Textarea
-                  value={skillsData.otherSkills}
-                  onChange={(e) => setSkillsData({
-                    ...skillsData,
-                    otherSkills: e.target.value
-                  })}
-                  placeholder="List any additional skills not covered above"
-                  className="min-h-[100px] border-gray-200 bg-white"
-                  maxLength={500}
-                />
-                <div className="text-right text-sm text-gray-500">
-                  {skillsData.otherSkills.length}/500 characters
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-gray-700">
-                  Upload optional supporting file (image or pdf)
-                </Label>
-                <input
-                  type="file"
-                  ref={skillsFileInputRef}
-                  className="hidden"
-                  accept="image/*,.pdf"
-                  onChange={(e) => handleSkillsFileChange(e.target.files?.[0] || null)}
-                />
-                
-                {!skillsData.file ? (
-                  <div
-                    className="flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-gray-100"
-                    onClick={() => skillsFileInputRef.current?.click()}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-gray-700">
+                    Soft Skills <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    onValueChange={(value) => {
+                      if (!skillsData.softSkills.includes(value)) {
+                        setSkillsData({
+                          ...skillsData,
+                          softSkills: [...skillsData.softSkills, value]
+                        });
+                      }
+                    }}
                   >
-                    <div className="text-center">
-                      <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                      <p className="mt-2 text-sm text-gray-500">
-                        Click to upload or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Images or PDF (max 5MB)
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative rounded-lg border border-gray-200 p-4">
-                    <div className="flex items-center gap-4">
-                      {skillsData.filePreview ? (
-                        <div className="relative">
-                          <img
-                            src={skillsData.filePreview}
-                            alt="Preview"
-                            className="h-20 w-20 rounded object-cover"
-                          />
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-white shadow-md hover:bg-gray-100"
-                            onClick={() => window.open(skillsData.filePreview, '_blank')}
+                    <SelectTrigger className="border-gray-200 bg-white">
+                      <SelectValue placeholder="Select your Soft Skills from the options below" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {softSkills.map((skill) => (
+                        <SelectItem key={skill} value={skill}>
+                          {skill}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {skillsData.softSkills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {skillsData.softSkills.map((skill, index) =>
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
+                        >
+                          {skill}
+                          <button
+                            onClick={() => {
+                              setSkillsData({
+                                ...skillsData,
+                                softSkills: skillsData.softSkills.filter((_, i) => i !== index)
+                              });
+                            }}
+                            className="ml-1 text-primary hover:text-primary/80"
                           >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="relative">
-                          <div className="flex h-20 w-20 items-center justify-center rounded bg-gray-100">
-                            <p className="text-sm text-gray-500">PDF</p>
-                          </div>
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-white shadow-md hover:bg-gray-100"
-                            onClick={() => window.open(URL.createObjectURL(skillsData.file!), '_blank')}
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
+                            <X className="h-3 w-3" />
+                          </button>
                         </div>
                       )}
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {skillsData.file.name}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-700">
+                    Hard Skills <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    onValueChange={(value) => {
+                      if (!skillsData.hardSkills.includes(value)) {
+                        setSkillsData({
+                          ...skillsData,
+                          hardSkills: [...skillsData.hardSkills, value]
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="border-gray-200 bg-white">
+                      <SelectValue placeholder="Select your Hard Skills from the options below" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hardSkills.map((skill) => (
+                        <SelectItem key={skill} value={skill}>
+                          {skill}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {skillsData.hardSkills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {skillsData.hardSkills.map((skill, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
+                        >
+                          {skill}
+                          <button
+                            onClick={() => {
+                              setSkillsData({
+                                ...skillsData,
+                                hardSkills: skillsData.hardSkills.filter((_, i) => i !== index)
+                              });
+                            }}
+                            className="ml-1 text-primary hover:text-primary/80"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-700">Other Skills</Label>
+                  <Textarea
+                    value={skillsData.otherSkills}
+                    onChange={(e) => setSkillsData({
+                      ...skillsData,
+                      otherSkills: e.target.value
+                    })}
+                    placeholder="List any additional skills not covered above"
+                    className="min-h-[100px] border-gray-200 bg-white"
+                    maxLength={500}
+                  />
+                  <div className="text-right text-sm text-gray-500">
+                    {skillsData.otherSkills.length}/500 characters
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-700">
+                    Upload optional supporting file (image or pdf)
+                  </Label>
+                  <input
+                    type="file"
+                    ref={skillsFileInputRef}
+                    className="hidden"
+                    accept="image/*,.pdf"
+                    onChange={(e) => handleSkillsFileChange(e.target.files?.[0] || null)}
+                  />
+                  
+                  {!skillsData.file ? (
+                    <div
+                      className="flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-gray-100"
+                      onClick={() => skillsFileInputRef.current?.click()}
+                    >
+                      <div className="text-center">
+                        <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                        <p className="mt-2 text-sm text-gray-500">
+                          Click to upload or drag and drop
                         </p>
-                        <p className="text-sm text-gray-500">
-                          {(skillsData.file.size / 1024).toFixed(1)} KB
+                        <p className="text-xs text-gray-400">
+                          Images or PDF (max 5MB)
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-gray-400 hover:text-gray-500"
-                        onClick={handleRemoveSkillsFile}
-                      >
-                        <X className="h-5 w-5" />
-                      </Button>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="relative rounded-lg border border-gray-200 p-4">
+                      <div className="flex items-center gap-4">
+                        {skillsData.filePreview ? (
+                          <div className="relative">
+                            <img
+                              src={skillsData.filePreview}
+                              alt="Preview"
+                              className="h-20 w-20 rounded object-cover"
+                            />
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-white shadow-md hover:bg-gray-100"
+                              onClick={() => window.open(skillsData.filePreview, '_blank')}
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="relative">
+                            <div className="flex h-20 w-20 items-center justify-center rounded bg-gray-100">
+                              <p className="text-sm text-gray-500">PDF</p>
+                            </div>
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-white shadow-md hover:bg-gray-100"
+                              onClick={() => window.open(URL.createObjectURL(skillsData.file!), '_blank')}
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {skillsData.file.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {(skillsData.file.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-gray-400 hover:text-gray-500"
+                          onClick={handleRemoveSkillsFile}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
               </div>
               <div className="space-y-2">
                 <Label className="text-gray-700">Narrative</Label>
@@ -1647,33 +1692,33 @@ export default function RestorativeRecord() {
                 Listing your participation in rehabilitative programs highlights your resilience, growth, and commitment to positive change. Include any programs you completed before, during, or after incarceration—these experiences show your dedication to self-improvement and your readiness for new opportunities.
               </p>
             </div>
-            <div className="space-y-4">
-              <Label className="text-gray-700">
-                Select the Rehabilitative Programs you have completed
-              </Label>
-              <div className="grid gap-4">
+              <div className="space-y-4">
+                <Label className="text-gray-700">
+                  Select the Rehabilitative Programs you have completed
+                </Label>
+                <div className="grid gap-4">
                 {rehabilitativePrograms.map((program) => {
                   const selected = selectedPrograms.find(p => p.id === program.id);
                   return (
                     <div key={program.id} className="flex flex-col space-y-2 rounded-lg border border-gray-200 p-4">
                       <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id={program.id}
+                      <Checkbox
+                        id={program.id}
                           checked={!!selected}
-                          onCheckedChange={(checked) => handleProgramChange(program.id, checked as boolean)}
-                        />
-                        <div className="space-y-1">
-                          <label
-                            htmlFor={program.id}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {program.name}
-                          </label>
-                          <p className="text-sm text-gray-500">
-                            {program.description}
-                          </p>
-                        </div>
+                        onCheckedChange={(checked) => handleProgramChange(program.id, checked as boolean)}
+                      />
+                      <div className="space-y-1">
+                        <label
+                          htmlFor={program.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {program.name}
+                        </label>
+                        <p className="text-sm text-gray-500">
+                          {program.description}
+                        </p>
                       </div>
+                    </div>
                       {selected && (
                         <div className="mt-2 space-y-2">
                           <Label className="text-gray-700">Narrative</Label>
@@ -1690,8 +1735,8 @@ export default function RestorativeRecord() {
                           />
                           <div className="text-right text-sm text-gray-500">
                             {selected.narrative.length}/500 characters
-                          </div>
-                        </div>
+                </div>
+              </div>
                       )}
                     </div>
                   );
@@ -1707,7 +1752,7 @@ export default function RestorativeRecord() {
             <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded">
               <p className="text-gray-700 text-base">
                 Microcredentials, certifications, and licenses are valuable proof of your skills and commitment to learning. Include any certificates, training, or credentials you've earned—whether through formal education, online courses, or programs completed during incarceration or reentry. These achievements help show your expertise and dedication.
-              </p>
+            </p>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -2881,7 +2926,7 @@ export default function RestorativeRecord() {
             PREVIOUS
           </Button>
           <Button 
-            className="bg-primary text-white hover:bg-primary/90"
+            className="bg-black text-white hover:bg-primary/90"
             onClick={handleNext}
           >
             NEXT

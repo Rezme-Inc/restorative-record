@@ -26,7 +26,7 @@ export default function Home() {
 
             <div className="space-y-4">
               <Button 
-                className="w-full bg-primary hover:bg-primary/90" 
+                className="bg-black text-white w-full" 
                 size="lg"
                 onClick={() => router.push('/signup')}
               >
@@ -34,8 +34,7 @@ export default function Home() {
               </Button>
               
               <Button
-                variant="outline"
-                className="w-full border-primary/20 hover:bg-primary/5"
+                className="bg-black text-white w-full"
                 size="lg"
               >
                 LOGIN

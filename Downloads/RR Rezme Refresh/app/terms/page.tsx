@@ -56,14 +56,13 @@ export default function Terms() {
 
             <div className="flex justify-between">
               <Button
-                variant="outline"
-                className="w-32"
+                className="w-32 bg-black text-white"
                 onClick={() => router.push('/signup')}
               >
                 LOGOUT
               </Button>
               <Button
-                className="w-32 bg-primary text-white hover:bg-primary/90"
+                className="w-32 bg-black text-white"
                 disabled={!agreed}
                 onClick={() => router.push('/dashboard')}
               >

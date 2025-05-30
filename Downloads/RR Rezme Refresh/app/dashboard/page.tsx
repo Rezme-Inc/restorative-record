@@ -182,7 +182,7 @@ export default function Dashboard() {
                     <User className="h-16 w-16 text-gray-400" />
                   </AvatarFallback>
                 </Avatar>
-                <Button variant="outline" className="w-full" onClick={handleEditClick}>
+                <Button className="bg-black text-white" onClick={handleEditClick}>
                   Upload Photo
                 </Button>
                 <p className="text-xs text-gray-500">
@@ -208,11 +208,7 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="pt-7">
-                  <Button 
-                    variant="outline" 
-                    className="h-10"
-                    onClick={() => router.push('/change-email')}
-                  >
+                  <Button className="bg-black text-white" onClick={() => router.push('/change-email')}>
                     CHANGE EMAIL
                   </Button>
                 </div>
@@ -343,14 +339,10 @@ export default function Dashboard() {
         </Tabs>
 
         <div className="flex justify-between pt-6">
-          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50">
+          <Button className="bg-black text-white">
             DELETE PROFILE
           </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-primary text-white hover:bg-primary/90"
-          >
+          <Button className="bg-black text-white" onClick={handleSave} disabled={saving}>
             TO RESTORATIVE RECORD
           </Button>
         </div>
